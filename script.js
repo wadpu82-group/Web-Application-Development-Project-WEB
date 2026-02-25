@@ -259,10 +259,10 @@ function applyIntents(intents, rawText) {
     "healthy": "🥗 Healthy"
   };
   
-  const priceText = activePriceFilter === "under50" ? " (harga di bawah 50rb)" : "";
-  const catText = primary ? categoryNames[primary] || primary : "semua menu";
+  const priceText = activePriceFilter === "under50" ? " (price under 50rb)" : "";
+  const catText = primary ? categoryNames[primary] || primary : "all menu";
   
-  appendMsg(`Oke! Menampilkan ${catText}${priceText}. Silakan pilih menu yang diinginkan 😊`, "bot");
+  appendMsg(`Okay! Showing ${catText}${priceText}. Please select your desired menu 😊`, "bot");
 }
 
 // 4) Fallback fuzzy search kalau tidak ada intent yang cocok
@@ -300,7 +300,7 @@ function fuzzySearchFallback(userText) {
     renderCategories();
     filterMenu();
     
-    appendMsg(`Ditemukan ${scored.length} menu yang cocok dengan "${userText}":`, "bot", scored);
+    appendMsg(`Found ${scored.length} menus matching "${userText}":`, "bot", scored);
     return true;
   }
   return false;
@@ -327,7 +327,7 @@ function smartChatSearch(userText) {
 
   // feedback kalau tidak ketemu
   if (!ok) {
-    appendMsg("Maaf, aku belum menemukan menu yang cocok. Coba: spicy / drink / dessert / noodles / seafood / salad / under 50k / healthy 😊", "bot");
+    appendMsg("Sorry, I haven't found a matching menu. Try: spicy / drink / dessert / noodles / seafood / salad / under 50k / healthy 😊", "bot");
   }
 }
 
@@ -383,8 +383,8 @@ function selectFromChatbot(category) {
     "drink": "🧋 Drinks",
     "sweet": "🍰 Dessert",
     "snack": "🍟 Snack",
-    "under50": "💵 Harga di bawah 50rb",
-    "all": "🍽️ Semua Menu"
+    "under50": "💵 Price under 50rb",
+    "all": "🍽️ All Menu"
   };
 
   var userMsg = document.createElement("div");
@@ -395,7 +395,7 @@ function selectFromChatbot(category) {
   setTimeout(function() {
     var botMsg = document.createElement("div");
     botMsg.className = "mb-3";
-    botMsg.innerHTML = '<div class="bg-orange-700 text-white inline-block px-4 py-2 rounded-2xl rounded-bl-sm text-sm">Baik! Ini dia menu ' + (categoryNames[category] || category) + ':</div>';
+    botMsg.innerHTML = '<div class="bg-orange-700 text-white inline-block px-4 py-2 rounded-2xl rounded-bl-sm text-sm">Sure! Here is the ' + (categoryNames[category] || category) + ' menu:</div>';
     messagesDiv.appendChild(botMsg);
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
   }, 300);
@@ -417,8 +417,9 @@ function filterMenuForChatbot(category) {
   var itemsDiv = document.createElement("div");
   itemsDiv.className = "bg-white rounded-xl p-3 mb-3 max-h-48 overflow-y-auto";
 
+
   if (filtered.length === 0) {
-    itemsDiv.innerHTML = '<p class="text-sm text-gray-500">Menu tidak ditemukan</p>';
+    itemsDiv.innerHTML = '<p class="text-sm text-gray-500">Menu not found</p>';
   } else {
     var itemsHtml = "";
     for(var i = 0; i < Math.min(filtered.length, 8); i++) {
@@ -457,7 +458,7 @@ function addFromChatbot(id) {
 
   addToCart(id);
   updateChatbotSelectedItems();
-  showToast("✅ " + item.name + " ditambahkan!", "success");
+  showToast("✅ " + item.name + " added!", "success");
 }
 
 function updateChatbotSelectedItems() {
@@ -510,12 +511,12 @@ function removeFromChatbot(index) {
 
 function proceedToCart() {
   if (chatbotSelectedItems.length === 0) {
-    showToast("Silakan pilih menu terlebih dahulu!", "error");
+    showToast("Please select a menu first!", "error");
     return;
   }
   toggleChatbot();
   setTimeout(function() { toggleCart(); }, 300);
-  showToast("Pesanan ditambahkan ke keranjang!", "success");
+  showToast("Order added to cart!", "success");
 }
 
 function checkChatbotOnLoad() {
@@ -619,8 +620,8 @@ function renderMenu(items){
     container.innerHTML =
       '<div class="col-span-full text-center py-12">' +
         '<div class="text-6xl mb-4">🔍</div>' +
-        '<h3 class="text-xl font-bold text-white mb-2">Menu Tidak Ditemukan</h3>' +
-        '<p class="text-orange-200">Coba cari dengan kata kunci lain atau pilih kategori lain</p>' +
+        '<h3 class="text-xl font-bold text-white mb-2">Menu Not Found</h3>' +
+        '<p class="text-orange-200">Try searching with other keywords or choose another category</p>' +
       '</div>';
     return;
   }
@@ -631,8 +632,8 @@ function renderMenu(items){
     card.className = "menu-card";
 
     var badges = "";
-    if(item.taste === "spicy") badges += '<span class="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">🌶️ Pedas</span>';
-    if(item.taste === "sweet") badges += '<span class="absolute top-2 right-2 bg-pink-500 text-white text-xs px-2 py-1 rounded-full">🍬 Manis</span>';
+    if(item.taste === "spicy") badges += '<span class="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">🌶️ Spicy</span>';
+    if(item.taste === "sweet") badges += '<span class="absolute top-2 right-2 bg-pink-500 text-white text-xs px-2 py-1 rounded-full">🍬 Sweet</span>';
     if(item.price >= 50000) badges += '<span class="absolute top-2 left-2 premium-badge text-white text-xs px-2 py-1 rounded-full">💎 Premium</span>';
 
     var isImg = isImagePath(item.img);
@@ -650,7 +651,7 @@ function renderMenu(items){
         '<h3 class="font-bold text-sm mb-2">' + item.name + '</h3>' +
         '<p class="text-orange-600 font-bold mb-3">Rp ' + item.price.toLocaleString() + '</p>' +
         '<div class="flex items-center gap-2">' +
-          '<button onclick="addToCart(' + item.id + ')" class="flex-1 bg-orange-700 text-white py-2 rounded-xl text-sm hover:bg-orange-800 transition-colors">Tambah 🛒</button>' +
+          '<button onclick="addToCart(' + item.id + ')" class="flex-1 bg-orange-700 text-white py-2 rounded-xl text-sm hover:bg-orange-800 transition-colors">Add 🛒</button>' +
         '</div>' +
       '</div>';
 
@@ -723,7 +724,7 @@ function addToCart(id){
   else cart.push(Object.assign({}, item, {qty: 1}));
 
   saveCart();
-  showToast("✅ " + item.name + " ditambahkan ke keranjang!", "success");
+  showToast("✅ " + item.name + " added to cart!", "success");
 }
 
 function updateCart(){
@@ -733,8 +734,8 @@ function updateCart(){
     itemsDiv.innerHTML =
       '<div class="text-center py-8">' +
         '<div class="text-5xl mb-3">🛒</div>' +
-        '<p class="text-gray-500">Keranjang masih kosong</p>' +
-        '<p class="text-sm text-gray-400">Yuk, pesan makanan favoritmu!</p>' +
+        '<p class="text-gray-500">Your cart is still empty</p>' +
+        '<p class="text-sm text-gray-400">Come on, order your favorite food!</p>' +
       '</div>';
     document.getElementById("cart-total").innerText = "0";
     return;
@@ -786,7 +787,7 @@ function removeFromCart(index){
   cart.splice(index, 1);
   saveCart();
   updateCart();
-  showToast("🗑️ " + item.name + " dihapus dari keranjang", "info");
+  showToast("🗑️ " + item.name + " removed from cart", "info");
 }
 
 function toggleCart(){
@@ -823,8 +824,8 @@ function checkout(){
   updateCart();
   renderOrders();
 
-  var discountMsg = discount > 0 ? "\n🎉 Diskon " + Math.round(discount * 100) + "% applied!" : "";
-  alert("✅ Pesanan berhasil!" + discountMsg + "\n💰 Total: Rp " + finalTotal.toLocaleString());
+  var discountMsg = discount > 0 ? "\n🎉 Discount " + Math.round(discount * 100) + "% applied!" : "";
+  alert("✅ Order successful!" + discountMsg + "\n💰 Total: Rp " + finalTotal.toLocaleString());
 }
 
 function switchView(view){
@@ -856,8 +857,8 @@ function renderOrders(){
     list.innerHTML =
       '<div class="text-center py-12">' +
         '<div class="text-6xl mb-4">📭</div>' +
-        '<h3 class="text-xl font-bold text-white mb-2">Belum Ada Pesanan</h3>' +
-        '<p class="text-orange-200">Pesanan akan muncul di sini</p>' +
+        '<h3 class="text-xl font-bold text-white mb-2">No Orders Yet</h3>' +
+        '<p class="text-orange-200">Orders will appear here</p>' +
       '</div>';
     return;
   }
@@ -874,10 +875,10 @@ function renderOrders(){
       '<div class="bg-white p-4 rounded-xl border border-orange-300 mb-3">' +
         '<div class="flex justify-between items-start mb-2">' +
           '<div class="text-sm font-bold text-orange-900">Order #' + o.id.toString().slice(-4) + '</div>' +
-          '<div class="text-xs text-orange-600">' + new Date(o.date).toLocaleDateString("id-ID") + '</div>' +
+        '<div class="text-xs text-orange-600">' + new Date(o.date).toLocaleDateString("id-ID") + '</div>' +
         '</div>' +
         '<div class="text-xs text-gray-600 mb-2">' + itemsStr + '</div>' +
-        (o.discount > 0 ? '<div class="text-xs text-green-600">🎉 Diskon ' + Math.round(o.discount * 100) + '%</div>' : '') +
+        (o.discount > 0 ? '<div class="text-xs text-green-600">🎉 Discount ' + Math.round(o.discount * 100) + '%</div>' : '') +
         '<div class="font-bold text-orange-700">Rp ' + o.total.toLocaleString() + '</div>' +
       '</div>';
   }
