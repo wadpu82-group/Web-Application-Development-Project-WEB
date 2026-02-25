@@ -132,7 +132,7 @@ body { background: #ffffff; }
   <!-- CART MODAL -->
   <div id="cart-modal" class="hidden fixed inset-0 cart-modal-bg flex items-center justify-center">
     <div class="cart-content w-96 p-6 rounded-2xl shadow-2xl">
-      <h2 class="font-bold mb-4 text-orange-900">Your Cart</h2>
+      <h2 class="font-bold mb-4 text-orange-900">Shopping Cart</h2>
       <div id="cart-items"></div>
       <div class="mt-4 font-bold text-orange-900">
         Total: Rp <span id="cart-total">0</span>
@@ -143,18 +143,18 @@ body { background: #ffffff; }
       </button>
       <button onclick="toggleCart()"
         class="mt-2 w-full bg-orange-100 text-orange-800 py-2 rounded-xl border border-orange-300 hover:bg-orange-200 transition-colors">
-        Close
+        Cancel
       </button>
     </div>
   </div>
 
 </div>
 
-<!-- SELLER VIEW -->
-<div id="seller-view" class="seller-view hidden max-w-5xl mx-auto p-6">
-  <h2 class="text-xl font-bold mb-4 text-white">Incoming Orders</h2>
-  <div id="orders-list"></div>
-</div>
+  <!-- SELLER VIEW -->
+  <div id="seller-view" class="seller-view hidden max-w-5xl mx-auto p-6">
+    <h2 class="text-xl font-bold mb-4 text-white">Order Management</h2>
+    <div id="orders-list"></div>
+  </div>
 
 <!-- CHATBOT PANEL -->
 <div id="chatbot-panel" class="chatbot-panel fixed right-0 top-0 h-full w-80 shadow-2xl z-50 flex flex-col transform transition-transform duration-300">
@@ -166,12 +166,12 @@ body { background: #ffffff; }
   <div id="chatbot-messages" class="flex-1 overflow-y-auto p-4" style="background: linear-gradient(180deg, #fff3e0 0%, #ffe0b2 100%);">
     <div class="mb-3">
       <div class="bg-orange-700 text-white inline-block px-4 py-2 rounded-2xl rounded-br-sm text-sm">
-        Halo! Silakan pilih menu yang ingin Anda pesan 👋
+        Hello! Please select the menu you want to order 👋
       </div>
     </div>
 
     <div class="space-y-2 mb-3">
-      <p class="text-xs text-orange-700 font-medium">Pilih kategori menu:</p>
+      <p class="text-xs text-orange-700 font-medium">Select menu category:</p>
       <div class="grid grid-cols-2 gap-2">
         <button onclick="selectFromChatbot('soup')" class="bg-orange-100 hover:bg-orange-200 text-orange-800 px-3 py-2 rounded-lg text-xs font-medium transition-colors">🍲 Soup</button>
         <button onclick="selectFromChatbot('fried rice')" class="bg-yellow-100 hover:bg-yellow-200 text-yellow-800 px-3 py-2 rounded-lg text-xs font-medium transition-colors">🍛 Fried Rice</button>
@@ -180,12 +180,12 @@ body { background: #ffffff; }
         <button onclick="selectFromChatbot('sweet')" class="bg-pink-100 hover:bg-pink-200 text-pink-800 px-3 py-2 rounded-lg text-xs font-medium transition-colors">🍰 Dessert</button>
         <button onclick="selectFromChatbot('snack')" class="bg-red-100 hover:bg-red-200 text-red-800 px-3 py-2 rounded-lg text-xs font-medium transition-colors">🍟 Snack</button>
         <button onclick="selectFromChatbot('under50')" class="bg-orange-100 hover:bg-orange-200 text-orange-800 px-3 py-2 rounded-lg text-xs font-medium transition-colors">💵 < 50rb</button>
-        <button onclick="selectFromChatbot('all')" class="bg-purple-100 hover:bg-purple-200 text-purple-800 px-3 py-2 rounded-lg text-xs font-medium transition-colors">🍽️ Semua Menu</button>
+        <button onclick="selectFromChatbot('all')" class="bg-purple-100 hover:bg-purple-200 text-purple-800 px-3 py-2 rounded-lg text-xs font-medium transition-colors">🍽️ All Menu</button>
       </div>
     </div>
 
     <div id="chatbot-selected-items" class="hidden mb-3">
-      <p class="text-xs text-orange-700 font-medium mb-2">Pesanan Anda:</p>
+      <p class="text-xs text-orange-700 font-medium mb-2">Your order:</p>
       <div id="chatbot-items-list" class="space-y-2"></div>
     </div>
 
@@ -201,14 +201,14 @@ body { background: #ffffff; }
     <button onclick="proceedToCart()" id="chatbot-proceed-btn"
       class="w-full bg-orange-600 hover:bg-orange-700 text-white py-3 rounded-xl font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       disabled>
-      🛒 Lanjutkan ke Cart
+      🛒 Proceed to Cart
     </button>
   </div>
 
   <!-- Chat Input Form -->
   <div class="p-4 border-t bg-white">
     <form id="chat-form" class="flex gap-2">
-      <input id="chat-input" type="text" placeholder="Cari menu..."
+      <input id="chat-input" type="text" placeholder="Search menu..."
         class="flex-1 p-2 border-2 border-orange-300 rounded-xl focus:outline-none focus:border-orange-600 text-sm"
         autocomplete="off" />
       <button type="submit" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-xl">🔍</button>
