@@ -214,55 +214,59 @@ function extractIntents(userText) {
 
 // 3) Apply intents ke state filter
 function applyIntents(intents, rawText) {
-  // Price cap: kalau user minta under50
-  if (intents.includes("anyprice")) {
-    activePriceFilter = "all";
-  }
-  if (intents.includes("under50")) {
-    activePriceFilter = "under50";
-  }
+  // ===== Price =====
+  if (intents.includes("anyprice")) activePriceFilter = "all";
+  if (intents.includes("under50")) activePriceFilter = "under50";
 
-  // Pilih primary category dari intent
-  const categoryOrder = ["noodles", "soup", "fried rice", "drink", "sweet", "snack", "salad", "satay", "steak", "burger", "pizza", "rice", "healthy"];
+  // ===== Category priority (IMPORTANT: spicy/seafood/salad/healthy are real categories too) =====
+  const categoryOrder = [
+    "spicy", "seafood", "salad", "healthy", // attribute categories
+    "noodles", "soup", "fried rice", "drink", "sweet", "snack",
+    "satay", "steak", "burger", "pizza", "rice"
+  ];
+
   const primary = categoryOrder.find(c => intents.includes(c));
 
-  // Set kategori kalau ada
-  if (primary) {
-    activeCategory = primary;
-  }
+  if (primary) activeCategory = primary;
+  else activeCategory = "all";
 
-  // Gabungkan remaining intents jadi keyword search (spicy/seafood/healthy/etc)
+  // ===== Search keyword =====
+  // Remove common useless words so long sentences still work
+  const stop = new Set(["i","want","something","food","please","plz","give","me","show","menu","a","an","the","to","order"]);
+  const words = normalizeText(rawText).split(" ").filter(w => w && !stop.has(w));
+
+  // extras = intents besides category & price
   const extraTags = intents.filter(x => !categoryOrder.includes(x) && !["under50","anyprice"].includes(x));
 
-  // Gabungkan dengan text asli untuk search
-  const combined = [rawText, ...extraTags].join(" ");
-  searchQuery = combined.trim();
+  searchQuery = [...new Set([...words, ...extraTags])].join(" ").trim();
 
   // Update UI
   renderCategories();
   filterMenu();
-  
-  // Show feedback di chatbot
+
+  // Bot feedback
   const categoryNames = {
+    "spicy": "🌶️ Spicy",
+    "seafood": "🦐 Seafood",
+    "salad": "🥗 Salad",
+    "healthy": "🥗 Healthy",
     "noodles": "🍜 Noodles",
     "soup": "🍲 Soup",
     "fried rice": "🍛 Fried Rice",
     "drink": "🧋 Drinks",
     "sweet": "🍰 Dessert",
     "snack": "🍟 Snack",
-    "salad": "🥗 Salad",
     "satay": "🍢 Satay",
     "steak": "🥩 Steak",
     "burger": "🍔 Burger",
     "pizza": "🍕 Pizza",
-    "rice": "🍚 Rice",
-    "healthy": "🥗 Healthy"
+    "rice": "🍚 Rice"
   };
-  
-  const priceText = activePriceFilter === "under50" ? " (price under 50rb)" : "";
-  const catText = primary ? categoryNames[primary] || primary : "all menu";
-  
-  appendMsg(`Okay! Showing ${catText}${priceText}. Please select your desired menu 😊`, "bot");
+
+  const priceText = activePriceFilter === "under50" ? " (under 50rb)" : "";
+  const catText = primary ? (categoryNames[primary] || primary) : "🍽️ All Menu";
+
+  appendMsg(`Okay! Showing ${catText}${priceText}. 😊`, "bot");
 }
 
 // 4) Fallback fuzzy search kalau tidak ada intent yang cocok
@@ -600,8 +604,19 @@ function filterMenu(){
     filtered = filtered.filter(function(item) { return item.cat && item.cat.includes(activeCategory); });
   }
 
-  if(searchQuery){
-    filtered = filtered.filter(function(item) { return item.name.toLowerCase().indexOf(searchQuery) !== -1; });
+  if (searchQuery) {
+    const qWords = normalizeText(searchQuery).split(" ").filter(Boolean);
+
+    filtered = filtered.filter(function(item) {
+      const hay = normalizeText(
+        (item.name || "") + " " +
+        (item.taste || "") + " " +
+        ((item.cat || []).join(" "))
+      );
+
+      // Match if ANY keyword appears in name/cat/taste
+      return qWords.some(w => hay.includes(w));
+    });
   }
 
   renderMenu(filtered.slice(0, 40));
@@ -638,7 +653,7 @@ function renderMenu(items){
 
     var isImg = isImagePath(item.img);
     var imgContent = isImg 
-      ? '<img src="' + item.img + '" class="menu-image lazy-image" alt="' + item.name.replace(/"/g,'"') + '">'
+      ? '<img data-src="' + item.img + '" src="" class="menu-image lazy-image" alt="' + item.name.replace(/"/g,'"') + '">'
       : '<div class="h-[180px] flex items-center justify-center text-6xl bg-orange-50">' + item.img + '</div>';
 
     card.innerHTML =
@@ -663,26 +678,49 @@ function renderMenu(items){
 
 function lazyLoad(){
   var images = document.querySelectorAll(".lazy-image");
-  var observer = new IntersectionObserver(function(entries){
-    for(var i = 0; i < entries.length; i++){
-      var entry = entries[i];
-      if(entry.isIntersecting){
-        var img = entry.target;
-        img.src = img.dataset.src;
-        img.onload = function(){
-          img.classList.add("loaded");
-          if(img.previousElementSibling && img.previousElementSibling.classList.contains("skeleton")){
-            img.previousElementSibling.remove();
-          }
-        };
-        observer.unobserve(img);
-      }
-    }
-  });
 
-  for(var i = 0; i < images.length; i++){
-    observer.observe(images[i]);
+  // If browser doesn't support IntersectionObserver, load all directly
+  if (!("IntersectionObserver" in window)) {
+    images.forEach(function(img){
+      img.src = img.dataset.src;
+      img.onload = function(){ img.classList.add("loaded"); };
+      img.onerror = function(){
+        img.classList.add("loaded");
+        img.style.display = "none";
+      };
+    });
+    return;
   }
+
+  var observer = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if(!entry.isIntersecting) return;
+
+      var img = entry.target;
+      var src = img.dataset.src;
+
+      if (!src) {
+        observer.unobserve(img);
+        return;
+      }
+
+      img.src = src;
+      img.onload = function(){
+        img.classList.add("loaded");
+        var sk = img.parentElement.querySelector(".skeleton");
+        if (sk) sk.remove();
+      };
+      img.onerror = function(){
+        img.classList.add("loaded");
+        var sk = img.parentElement.querySelector(".skeleton");
+        if (sk) sk.remove();
+      };
+
+      observer.unobserve(img);
+    });
+  }, { rootMargin: "200px" });
+
+  images.forEach(function(img){ observer.observe(img); });
 }
 
 function showToast(message, type){
